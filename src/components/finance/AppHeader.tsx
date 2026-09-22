@@ -73,9 +73,14 @@ export function AppHeader({ onAdd, onManageCategories }: AppHeaderProps) {
       <header className="sticky top-0 z-30 border-b border-border/70 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:gap-3">
           <div className="mr-auto flex items-center gap-3">
-            <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-sm ring-1 ring-primary/20">
-              <Wallet className="size-5" aria-hidden="true" />
-            </span>
+              <img
+      src="/favicon.png"
+      alt=""
+      width={40}
+      height={40}
+      className="size-10 object-contain"
+      aria-hidden="true"
+    />
             <div className="leading-tight">
     <p className="font-display text-base font-semibold tracking-tight sm:text-lg">
       Mizan

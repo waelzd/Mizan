@@ -37,22 +37,12 @@ import {
   PieChart as PieChartIcon,
   LineChart as LineChartIcon,
   ListOrdered,
-  ArrowUpRight,
-  ArrowDownRight,
-  ReceiptText,
-  ChartPie,
-  TrendingUp as TrendingUpIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BudgetDialog } from "@/components/finance/BudgetDialog";
 import { useFinance } from "@/lib/finance/store";
 import { formatMoney } from "@/lib/finance/format";
-import { CategoryIcon } from "@/lib/finance/icons";
 import { cn } from "@/lib/utils";
-
-/* -------------------------------------------------------------------------- */
-/*                                    Panel                                   */
-/* -------------------------------------------------------------------------- */
 
 type PanelProps = {
   title: string;
@@ -62,7 +52,9 @@ type PanelProps = {
   empty?: boolean;
   emptyMessage?: string;
   className?: string;
+  /** Small icon shown in a colored tile to the left of the title. */
   icon?: React.ReactNode;
+  /** Tailwind classes for the accent color, e.g. "text-primary bg-primary/10". */
   accentClassName?: string;
 };
 
@@ -115,88 +107,6 @@ function Panel({
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                  StatCard                                  */
-/* -------------------------------------------------------------------------- */
-
-type StatCardProps = {
-  label: string;
-  value: React.ReactNode;
-  hint?: React.ReactNode;
-  icon?: React.ReactNode;
-  /** Tailwind text color class for the value and hint accent. */
-  textClassName?: string;
-  /** Tailwind classes for the icon tile background. */
-  iconBgClassName?: string;
-  /** Inline style color — overrides textClassName when provided (for dynamic colors). */
-  valueColor?: string;
-  /** Inline style for the icon tile — overrides iconBgClassName when provided. */
-  iconStyle?: React.CSSProperties;
-  hintIcon?: React.ReactNode;
-  className?: string;
-};
-
-function StatCard({
-  label,
-  value,
-  hint,
-  icon,
-  textClassName = "text-foreground",
-  iconBgClassName = "bg-muted text-muted-foreground",
-  valueColor,
-  iconStyle,
-  hintIcon,
-  className,
-}: StatCardProps) {
-  return (
-    <div
-      className={cn(
-        "card-surface flex flex-col gap-2 p-4 transition-colors",
-        className,
-      )}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {label}
-        </p>
-        {icon ? (
-          <span
-            className={cn(
-              "flex size-7 shrink-0 items-center justify-center rounded-lg",
-              !iconStyle && iconBgClassName,
-            )}
-            style={iconStyle}
-            aria-hidden="true"
-          >
-            {icon}
-          </span>
-        ) : null}
-      </div>
-
-      <div
-        className={cn(
-          "font-display text-2xl font-semibold tabular-nums leading-tight",
-          !valueColor && textClassName,
-        )}
-        style={valueColor ? { color: valueColor } : undefined}
-      >
-        {value}
-      </div>
-
-      {hint ? (
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          {hintIcon}
-          {hint}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                ChartTooltip                                */
-/* -------------------------------------------------------------------------- */
-
 function ChartTooltip({
   active,
   payload,
@@ -233,10 +143,6 @@ function ChartTooltip({
 function currentMonthKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
-
-/* -------------------------------------------------------------------------- */
-/*                                   Charts                                   */
-/* -------------------------------------------------------------------------- */
 
 export function Charts({ month }: { month: Date }) {
   const expenses = useFinance((s) => s.expenses);
@@ -304,7 +210,6 @@ export function Charts({ month }: { month: Date }) {
           id,
           name: cat?.name ?? "Deleted",
           color: cat?.color ?? "#6b7a85",
-          icon: cat?.icon ?? "wallet",
           amount,
           pct: total ? (amount / total) * 100 : 0,
         };
@@ -345,21 +250,6 @@ export function Charts({ month }: { month: Date }) {
     prevMonthTotal > 0
       ? ((monthTotal - prevMonthTotal) / prevMonthTotal) * 100
       : null;
-
-  /* --------------------- Stat card derived values --------------------- */
-
-  const topCategory = byCategory[0] ?? null;
-
-  const daysElapsed = useMemo(() => {
-    if (isFutureMonth) return 0;
-    if (isCurrentMonth) return today.getDate();
-    return endOfMonth(month).getDate();
-  }, [isCurrentMonth, isFutureMonth, month, today]);
-
-  const avgPerDay =
-    daysElapsed > 0 ? Math.round(monthTotal / daysElapsed) : 0;
-
-  const transactionCount = monthExpenses.length;
 
   /* --------------------------------- Budget -------------------------------- */
 
@@ -423,107 +313,15 @@ export function Charts({ month }: { month: Date }) {
     ? "Nothing here yet."
     : `No categories used in ${monthLabel}.`;
 
+  /* ---------- Dynamic accent for the "By category" panel ---------- */
+  // Uses the top category's color so the header dot reflects the pie's dominant slice.
+  const topCategoryColor = byCategory[0]?.color ?? "#2ba88a";
+
   /* --------------------------------- Render -------------------------------- */
 
   return (
     <>
-      {/* ------------------------------ Stat row ------------------------------ */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Spent this month — emerald */}
-        <StatCard
-          label="Spent this month"
-          value={money(monthTotal)}
-          icon={<ReceiptText className="size-3.5" />}
-          textClassName="text-emerald-600 dark:text-emerald-400"
-          iconBgClassName="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-          hint={
-            delta !== null ? (
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1 tabular-nums",
-                  delta > 0
-                    ? "text-destructive"
-                    : delta < 0
-                    ? "text-emerald-600 dark:text-emerald-500"
-                    : "text-muted-foreground",
-                )}
-              >
-                {delta > 0 ? (
-                  <ArrowUpRight className="size-3" />
-                ) : delta < 0 ? (
-                  <ArrowDownRight className="size-3" />
-                ) : (
-                  <Minus className="size-3" />
-                )}
-                {Math.abs(delta).toFixed(0)}% vs last month
-              </span>
-            ) : (
-              "No data for last month"
-            )
-          }
-        />
-
-        {/* Top category — uses the category's own color */}
-        <StatCard
-          label="Top category"
-          value={topCategory?.name ?? "—"}
-          valueColor={topCategory?.color}
-          icon={
-            topCategory ? (
-              <CategoryIcon icon={topCategory.icon} className="size-3.5" />
-            ) : (
-              <ChartPie className="size-3.5" />
-            )
-          }
-          iconStyle={
-            topCategory
-              ? {
-                  backgroundColor: `${topCategory.color}22`,
-                  color: topCategory.color,
-                }
-              : undefined
-          }
-          iconBgClassName="bg-muted text-muted-foreground"
-          hint={
-            topCategory ? (
-              <span className="tabular-nums">
-                {money(topCategory.amount)} · {topCategory.pct.toFixed(0)}%
-              </span>
-            ) : (
-              "No expenses yet"
-            )
-          }
-        />
-
-        {/* Average per day — sky */}
-        <StatCard
-          label="Average per day"
-          value={money(avgPerDay)}
-          icon={<TrendingUpIcon className="size-3.5" />}
-          textClassName="text-sky-600 dark:text-sky-400"
-          iconBgClassName="bg-sky-500/10 text-sky-600 dark:text-sky-400"
-          hint={
-            isFutureMonth
-              ? "This month hasn't started"
-              : isCurrentMonth
-              ? "Based on days elapsed"
-              : `Based on ${daysElapsed} days`
-          }
-        />
-
-        {/* Transactions — violet */}
-        <StatCard
-          label="Transactions"
-          value={transactionCount}
-          icon={<ListOrdered className="size-3.5" />}
-          textClassName="text-violet-600 dark:text-violet-400"
-          iconBgClassName="bg-violet-500/10 text-violet-600 dark:text-violet-400"
-          hint={isFutureMonth ? "Nothing yet" : monthLabel}
-        />
-      </div>
-
-      {/* ------------------------------ Charts ------------------------------ */}
-      <div className="mt-3 grid gap-3 lg:grid-cols-2">
+      <div className="grid gap-3 lg:grid-cols-2">
         {/* Spent this month — with budget progress */}
         <Panel
           title="Spent this month"
@@ -671,7 +469,7 @@ export function Charts({ month }: { month: Date }) {
           </div>
         </Panel>
 
-        {/* Spending per day */}
+        {/* Spending per day — primary green */}
         <Panel
           title="Spending per day"
           icon={<CalendarDays className="size-4" />}
@@ -725,7 +523,7 @@ export function Charts({ month }: { month: Date }) {
           </div>
         </Panel>
 
-        {/* By category */}
+        {/* By category — accent matches top category's color */}
         <Panel
           title="By category"
           icon={<PieChartIcon className="size-4" />}
@@ -769,7 +567,7 @@ export function Charts({ month }: { month: Date }) {
           </div>
         </Panel>
 
-        {/* Trend */}
+        {/* Trend — violet */}
         <Panel
           title="Last 6 months"
           icon={<LineChartIcon className="size-4" />}
@@ -847,7 +645,7 @@ export function Charts({ month }: { month: Date }) {
           </div>
         </Panel>
 
-        {/* Breakdown list */}
+        {/* Breakdown list — accent matches top category */}
         <Panel
           title="Category breakdown"
           icon={<ListOrdered className="size-4" />}
