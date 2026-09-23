@@ -81,7 +81,7 @@ export function AppHeader({ onAdd, onManageCategories }: AppHeaderProps) {
       className="size-10 object-contain"
       aria-hidden="true"
     />
-            <div className="leading-tight">
+            <div className="hidden leading-tight sm:block">
     <p className="font-display text-base font-semibold tracking-tight sm:text-lg">
       Mizan
     </p>
@@ -167,7 +167,7 @@ export function AppHeader({ onAdd, onManageCategories }: AppHeaderProps) {
             aria-disabled={!hasBudget}
             title={hasBudget ? "Add expense" : "Set your monthly budget first"}
             className={cn(
-              "gap-1.5 shadow-sm",
+              "hidden gap-1.5 shadow-sm sm:inline-flex",
               !hasBudget && "cursor-not-allowed opacity-60",
             )}
           >
