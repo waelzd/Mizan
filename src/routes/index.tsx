@@ -144,6 +144,7 @@ function Index() {
           onEdit={openEdit}
           hasAny={expenses.length > 0}
           onAdd={openAdd}
+          month={month}
         />
       </main>
 

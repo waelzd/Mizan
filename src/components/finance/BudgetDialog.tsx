@@ -62,7 +62,7 @@ export function BudgetDialog({
   }, [open, monthKey]);
 
   const monthLabel = (() => {
-    const [y, m] = monthKey.split("-").map(Number);
+    const [y = 0, m = 1] = monthKey.split("-").map(Number);
     return new Date(y, m - 1, 1).toLocaleDateString(undefined, {
       month: "long",
       year: "numeric",

@@ -267,7 +267,10 @@ function CurrencyDropdown({
       case "Enter":
       case " ":
         e.preventDefault();
-        commit(CURRENCIES[activeIndex].code);
+        const activeCurrency = CURRENCIES[activeIndex];
+        if (activeCurrency) {
+          commit(activeCurrency.code);
+        }
         break;
     }
   };
