@@ -134,10 +134,9 @@ export const useFinance = create<FinanceState>()(
         }),
     }),
     {
-      name: "fintrack-v1",
-      version: 3,
-      storage: createJSONStorage(() => localStorage),
-      skipHydration: true,
+  name: "fintrack-v1",
+  version: 3,
+  storage: createJSONStorage(() => localStorage),
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
 
